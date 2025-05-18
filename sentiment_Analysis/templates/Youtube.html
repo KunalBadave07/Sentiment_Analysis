@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Sentiment Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 90px 0px 20px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px; /* Adjusted minimum height */
+            background-image: url("https://assets.materialup.com/uploads/59f0d846-4dcc-49cf-bac7-2f18baca1e01/preview.png");
+            animation: bgAnimation 20s infinite alternate;
+        }
+
+        .container {
+            text-align: center;
+            animation: fadeIn 4s ease;
+            border-radius: 70px;
+            padding: 30px;
+            background-color: #FFF;
+            width: 350px;
+            max-width: 90%;
+            position: relative;
+            overflow: hidden;
+            opacity: 0.9;
+        }
+
+        h1 {
+            color: #ff0000;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        #input-text {
+            width: 70%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            background-color: #f0f0f0;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        #input-text:focus {
+            border-color: #ff3333;
+        }
+
+        #analyze-button {
+            padding: 8px;
+            font-size: 15px;
+            background-color: #FF6961;
+            border: none;
+            cursor: pointer;
+            border-radius: 10%;
+            position: absolute;
+            top: 75%;
+            right: 175px;
+            transform: translateY(-50%);
+
+        }
+
+        #analyze-button:hover {
+            background-color: #FF0000;
+        }
+
+        #reload-button {
+            padding: 5px;
+            font-size: 35px;
+            background-color: #FFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            position: absolute;
+            top: 52%;
+            left: 343px;
+            transform: translateY(-50%);
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        #reload-button:hover {
+            background-color: #fff; 
+            
+        }
+
+        #result {
+            margin-top: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #F98B88;
+            animation: resultAnimation 0.2s forwards;
+            opacity: 0;
+        }
+
+        .emoji-meter {
+            display: flex;
+            justify-content: center;
+            margin-top: 100px;
+            font-size: 24px;
+        }
+
+        .emoji-meter span {
+            margin: 0 10px;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+            animation: emojiAnimation 2s infinite alternate;
+        }
+
+        .emoji-meter span.active {
+            opacity: 1;
+        }
+
+        .analyzer-meter {
+            width: 100%;
+            height: 30px;
+            border-radius: 40px;
+            padding-bottom: 4%;
+            overflow: hidden;
+        }
+
+        .fill {
+            width: 1%;
+            height: 85%;
+            background-color: #FF6961;
+            transition: width 2s ease;
+            animation: fillAnimation 3s forwards;
+        }
+
+        @keyframes changeBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bgAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes buttonAnimation {
+            0% {
+                transform: translateY(-50%) scale(1);
+            }
+            50% {
+                transform: translateY(-50%) scale(1.1);
+            }
+            100% {
+                transform: translateY(-50%) scale(1);
+            }
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+
+        .social-button {
+            padding: 10px;
+            font-size: 20px;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            border-radius: 20%;
+            transition: background-color 0.3s ease;
+        }
+
+        .social-button:hover {
+            background-color: #A0A0A0;
+        }
+
+        #instagram-icon {
+            color: #833ab4; /* Instagram purple */
+        }
+
+        #twitter-icon {
+            color: #1da1f2; /* twitter purple */
+        }
+
+        #WhatsApp-icon {
+            color: #075e54; /* WhatsApp Green */
+        }
+
+        #Youtube-icon {
+            color: #ff0000; /* Youtube red */
+        }
+
+        #Reddit-icon {
+            color: #ff4500; /* Reddit orrange */
+        }
+
+        @keyframes changeBackground {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        @keyframes resultAnimation {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes emojiAnimation {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes fillAnimation {
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <i class="fab fa-youtube fa-4x" style="color: #ff0000;"></i>
+    <h1>YouTube Sentiment Analysis</h1>
+    <div class="button-container">
+        <button class="social-button" onclick="window.location.href='Twitter'">
+            <i id="twitter-icon" class="fab fa-twitter"></i>
+        </button>
+        <button class="social-button" onclick="window.location.href='Reddit'">
+            <i id="Reddit-icon " class="fab fa-reddit"></i>
+        </button>
+    </div>
+    <form id="sentiment-form" method="post">
+        {% csrf_token %}
+        <textarea id="input-text" name="video_url" class="analyzer-meter" placeholder="Enter your YouTube video link here..." autofocus></textarea><br>
+        <button type="submit" id="analyze-button">Submit</button>
+        <button type="button" id="reload-button">🔄️</button>
+    </form>
+    <div id="result"></div>
+    <div class="emoji-meter">
+        <span class="emoji"></span>
+        <span class="emoji"></span>
+        <span class="emoji"></span>
+    </div>
+    <div class="analyzer-meter">
+        <div class="fill" id="submit-button">😁😐😔</div>
+    </div>
+    <button class="social-button" onclick="window.location.href='/'">
+        <i id="home-icon" class="fas fa-home"></i>
+    </button>
+</div>
+
+<script>
+    document.getElementById('sentiment-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        var formData = new FormData(this);
+        fetch('/analyze_sentiment/', {  // Update endpoint URL to match your Django URL
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken') // Use a function to get the CSRF token
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Update UI based on sentiment analysis result
+                var resultElement = document.getElementById('result');
+                var emojis = document.querySelectorAll('.emoji-meter span');
+                var fill = document.querySelector('.fill');
+
+                // Reset fill
+                fill.style.width = '0%';
+
+                // Show loading animation
+                resultElement.innerHTML = 'Analyzing...';
+                emojis.forEach(function(emoji) {
+                    emoji.classList.remove('active');
+                });
+
+                // Simulate delay for analysis
+                setTimeout(function() {
+                    // Update UI based on sentiment analysis result
+                    resultElement.innerHTML = 'Sentiment: ' + data.label + ' Score: ' + data.score;
+                    // Fill up the analyzer meter
+                    fill.style.width = '100%';
+                }, 2000); // Adjust delay time as needed
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.getElementById('reload-button').addEventListener('click', function(event) {
+        location.reload();
+    });
+</script>
+</body>
+</html>

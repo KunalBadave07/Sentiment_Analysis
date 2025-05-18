@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Twitter Sentiment Analysis</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+
+    <style>
+      body {
+       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        background-image: url("https://i.pinimg.com/originals/13/27/f9/1327f9218e8a3cf08570f41b49ba73aa.png");
+        box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.6); /* Adjust the opacity as needed */
+            animation: bgAnimation 20s infinite alternate;
+      }
+
+      @keyframes pulseBackground {
+        0% {
+          background-color: #1da1f2;
+        }
+        100% {
+          background-color: #66c7ff; /* Lighter blue */
+        }
+      }
+
+      .container {
+        text-align: center;
+        border-radius: 25px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        background-color: #ffffff;
+        width: 240px;
+        max-width: 90%; /* Adjusted maximum width */
+        overflow: hidden; /* Hide overflowing content */
+        position: relative; /* Position for Twitter icon */
+        animation: fadeIn 1s ease; /* Fade in animation */
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        color: #1da1f2; /* Twitter blue */
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+
+      #input-text {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        border: 2px solid #ccd6dd; /* Light gray border */
+        border-radius: 20px;
+        background-color: #f5f8fa; /* Light gray background */
+        resize: none;
+      }
+
+      #analyze-button {
+        padding: 12px;
+        font-size: 20px;
+        background-color: #1da1f2; /* Twitter blue */
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+        color: #ffffff; /* White text */
+        position: absolute; /* Position button */
+        right: 20px; /* Align button to the right */
+        top: 20px; /* Align button to the top */
+        animation: pulseButton 6s infinite alternate; /* Pulse animation for button */
+      }
+
+      @keyframes pulseButton {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.1);
+        }
+      }
+
+      #analyze-button:hover {
+        background-color: #A0A0A0; /* Darker blue on hover */
+      }
+
+      #result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .emoji-meter {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 35px;
+        font-size: 30px;
+      }
+
+      .emoji-meter span {
+        opacity: 0.5;
+        transition: opacity 0.8s ease;
+      }
+
+      .emoji-meter span.active {
+        opacity: 1;
+      }
+
+      .analyzer-meter {
+        width: 100%;
+        height: 40px;
+        background-color: #25d366; /* Green */
+        border-radius: 5px;
+        padding-bottom: 5%;
+        overflow: hidden;
+      }
+
+      .fill {
+        width: 0%;
+        height: 100%;
+        background-color: #1da1f2; /* Twitter blue */
+        transition: width 2s ease;
+      }
+
+      .positive {
+        color: #1da1f2; /* Twitter blue */
+      }
+
+      .negative {
+        color: #ff3333; /* Red */
+      }
+
+      .neutral {
+        color: #808080; /* Gray */
+      }
+
+      /* Twitter icon styles */
+      #twitter-icon {
+        position: absolute;
+        top: -2px;
+        left: 20px;
+        font-size: 36px;
+        color: #1da1f2; /* Twitter blue */
+        animation: rotateIcon 10s infinite linear; /* Rotation animation */
+      }
+      .button-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 40px;
+      }
+
+      .social-button {
+        padding: 15px;
+        font-size: 30px;
+        background-color: #ffffff;
+        border: none;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+      }
+
+      .social-button:hover {
+        background-color: #A0A0A0;
+      }
+
+      #twitter-icon {
+        color: #1da1f2; /* twitter purple */
+      }
+      #WhatsApp-icon {
+        color: #075e54; /* WhatsApp Green */
+      }
+      #Youtube-icon {
+        color: #ff0000; /* Youtube red */
+      }
+      #Reddit-icon {
+        color: #ff4500; /* Reddit orrange */
+      }
+
+      @keyframes changeBackground {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      {% comment %} @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        } {% endcomment %}
+      @keyframes rotateIcon {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <i id="twitter-icon" class="fab fa-twitter"></i>
+      <!-- Twitter icon -->
+      <h1>Twitter Sentiment Analysis</h1>
+      
+      <div class="button-container">
+        <button class="social-button" onclick="window.location.href='/'">
+        <i id="home-icon" class="fas fa-home"></i>
+      </button>
+        <button class="social-button" onclick="window.location.href='Youtube'">
+          <i id="Youtube-icon" class="fab fa-youtube"></i>
+        </button>
+        <button class="social-button" onclick="window.location.href='Reddit'">
+          <i id="Reddit-icon " class="fab fa-reddit"></i>
+        </button>
+      </div>
+    </br>
+      <textarea
+        id="input-text"
+        placeholder="Enter URL here...."
+      ></textarea
+      ><br />
+      
+      
+      <div id="result"></div>
+    <div class="emoji-meter">
+        <span class="emoji">😞</span>
+        <span class="emoji">😐</span>
+        <span class="emoji">😊</span>
+      </div>
+      <div class="analyzer-meter">
+        <h5 id="submit-button">Submit</h5>
+        <div class="fill"></div>
+        {% comment %} <button id="analyze-button"><i class="fas fa-play">Play</i></button> {% endcomment %}
+      </div>
+
+
+    <script>
+      document
+        .getElementById("submit-button")
+        .addEventListener("click", function () {
+          var text = document.getElementById("input-text").value;
+          var resultElement = document.getElementById("result");
+          var emojis = document.querySelectorAll(".emoji-meter span");
+          var fill = document.querySelector(".fill");
+
+          // Reset fill
+          fill.style.width = "0%";
+
+          // Show loading animation
+          resultElement.innerHTML = "Analyzing...";
+          emojis.forEach(function (emoji) {
+            emoji.classList.remove("active");
+            emoji.innerHTML = ".";
+          });
+
+          // Simulate delay for analysis
+          setTimeout(function () {
+            var sentiment = analyzeSentiment(text);
+            if (sentiment === "positive") {
+              resultElement.innerHTML = "Sentiment: 😊 Positive";
+              resultElement.className = "positive";
+              emojis[2].classList.add("active");
+            } else if (sentiment === "negative") {
+              resultElement.innerHTML = "Sentiment: 😞 Negative";
+              resultElement.className = "negative";
+              emojis[0].classList.add("active");
+            } else {
+              resultElement.innerHTML = "Sentiment: 😐 Neutral";
+              resultElement.className = "neutral";
+              emojis[1].classList.add("active");
+            }
+            // Fill up the analyzer meter
+            fill.style.width = "100%";
+          }, 2000); // Adjust delay time as needed
+        });
+
+      function analyzeSentiment(text) {
+        // Placeholder function for sentiment analysis
+        // You can replace this with your actual sentiment analysis algorithm
+        // For simplicity, we'll just return random sentiment here
+        var sentiments = ["positive", "negative", "neutral"];
+        return sentiments[Math.floor(Math.random() * sentiments.length)];
+      }
+    </script>
+  </body>
+</html>

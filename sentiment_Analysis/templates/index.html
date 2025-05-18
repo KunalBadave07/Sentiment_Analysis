@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social Media Sentiment Analysis</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 90px 90px 90px 90px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        background-image: url("https://www.color-hex.com/palettes/44340.png");
+        animation: changeBackground 5s infinite alternate;
+      }
+
+      .container {
+        text-align: center;
+        animation: fadeIn 7s ease;
+        border-radius: 30px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 50px;
+        background-color: rgba(255, 255, 255, 0.95);
+        width: 500px;
+        max-width: 100%;
+      }
+
+      h1 {
+        color: #262626;
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 40px;
+      }
+
+      .social-button {
+        padding: 15px;
+        font-size: 25px;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.95);
+        cursor: pointer;
+        border-radius: 10%;
+        transition: background-color 0.3s ease;
+      }
+
+      .social-button:hover {
+        background-color: #a0a0a0;
+      }
+
+      #instagram-icon {
+        color: #833ab4; /* Instagram purple */
+      }
+      #twitter-icon {
+        color: #1da1f2; /* twitter purple */
+      }
+      #WhatsApp-icon {
+        color: #075e54; /* WhatsApp Green */
+      }
+      #Youtube-icon {
+        color: #ff0000; /* Youtube red */
+      }
+      #Reddit-icon {
+        color: #ff4500; /* Reddit orrange */
+      }
+
+      @keyframes changeBackground {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sentiment Analysis </h1>
+      <h1>😁😐😔</h1>
+      <div class="button-container">
+        <button class="social-button" onclick="window.location.href='Twitter'">
+          <i id="twitter-icon" class="fab fa-twitter"> Twitter</i>
+        </button>
+        <button class="social-button" onclick="window.location.href='Youtube'">
+          <i id="Youtube-icon" class="fab fa-youtube"> YouTube</i>
+        </button>
+        <button class="social-button" onclick="window.location.href='Reddit'">
+          <i id="Reddit-icon " class="fab fa-reddit"> Reddit</i>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
