@@ -35,5 +35,5 @@ No more guessing what the internet’s feeling — sentimentzzz brings clarity t
 
 1. Clone this repo:  
    ```bash
-   git clone https://github.com/KunalBadave07/sentimentzzz.git
-   cd sentimentzzz
+   git clone https://github.com/KunalBadave07/Sentiment_Analysis.git
+   cd Sentiment_Analysis
