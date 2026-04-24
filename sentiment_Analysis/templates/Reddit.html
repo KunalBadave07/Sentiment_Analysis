@@ -5,296 +5,654 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reddit Sentiment Analysis</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-image:url("https://i.pinimg.com/736x/10/fc/66/10fc665bb042776b16d487efbeb6a30b.jpg");
-            box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.6);
-            animation: bgAnimation 20s infinite alternate;
+        :root {
+            --ink: #171717;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --surface: rgba(255, 255, 255, 0.92);
+            --brand: #ff4500;
+            --brand-2: #0079d3;
+            --green: #16a34a;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
-        .container {
-            text-align: center;
-            animation: fadeIn 1s ease;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            background-color: #fff;
-            width: 240px;
-            max-width: 90%;
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(255, 69, 0, 0.22), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(0, 121, 211, 0.2), transparent 34%),
+                linear-gradient(135deg, #fff7ed 0%, #eff6ff 50%, #f8fafc 100%);
+            overflow-x: hidden;
+        }
+
+        .page {
+            width: min(1180px, calc(100% - 32px));
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 28px 0 42px;
+            display: grid;
+            align-content: center;
+            gap: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 900;
+        }
+
+        .brand i {
+            color: var(--brand);
+            font-size: 36px;
+            filter: drop-shadow(0 10px 22px rgba(255, 69, 0, 0.24));
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .icon-link {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.76);
+            color: var(--ink);
+            min-width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+        }
+
+        .icon-link:hover {
+            transform: translateY(-2px);
+            background: #fff;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .intro,
+        .panel {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .intro {
+            padding: clamp(28px, 5vw, 54px);
             position: relative;
             overflow: hidden;
         }
-        h1 {
-            color: #0079d3;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        #input-text {
-            width: 80%;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            border: 2px solid #ccc;
-            border-radius: 20px;
-            background-color: #f0f0f0;
-            resize: none;
-            transition: all 0.3s ease;
-        }
-        #input-text:focus {
-            border-color: #0079d3;
-        }
-        #analyze-button {
-            padding: 12px;
-            font-size: 20px;
-            background-color: #0079d3;
-            border: none;
-            cursor: pointer;
-            border-radius: 50%;
-            transition: background-color 0.3s ease;
+
+        .intro::after {
+            content: "";
             position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            animation: buttonAnimation 2s infinite;
+            inset: auto -80px -120px auto;
+            width: 260px;
+            height: 260px;
+            background: conic-gradient(from 120deg, rgba(255, 69, 0, 0.28), rgba(0, 121, 211, 0.18), rgba(22, 163, 74, 0.18), rgba(255, 69, 0, 0.28));
+            filter: blur(18px);
+            opacity: 0.8;
+            animation: floatGlow 8s ease-in-out infinite alternate;
         }
-        #analyze-button:hover {
-            background-color: #FF4500;
+
+        .kicker {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            color: #9a3412;
+            background: #ffedd5;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 18px;
         }
-        #result {
-            margin-top: 20px;
+
+        h1 {
+            margin: 0;
+            font-size: clamp(36px, 5.4vw, 66px);
+            line-height: 1;
+        }
+
+        .subtitle {
+            margin: 18px 0 0;
+            max-width: 620px;
+            color: #475569;
             font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            animation: resultAnimation 1.5s forwards;
-            opacity: 0;
+            line-height: 1.65;
         }
-        .emoji-meter {
+
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 34px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mini-stat {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .mini-stat strong {
+            display: block;
+            font-size: 22px;
+        }
+
+        .mini-stat span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .panel {
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-card,
+        .distribution,
+        .insights,
+        .comments {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            background: #fff;
+        }
+
+        label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 138px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 14px;
+            font: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border 180ms ease, box-shadow 180ms ease;
+        }
+
+        textarea:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(255, 69, 0, 0.12);
+        }
+
+        .actions {
             display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .primary-button,
+        .reset-button {
+            min-height: 46px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 20px;
-            font-size: 24px;
+            gap: 9px;
+            transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
         }
-        .emoji-meter span {
-            margin: 0 10px;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
-            animation: emojiAnimation 2s infinite alternate;
+
+        .primary-button {
+            padding: 0 20px;
+            color: #fff;
+            background: var(--brand);
+            box-shadow: 0 16px 26px rgba(255, 69, 0, 0.2);
         }
-        .emoji-meter span.active {
-            opacity: 1;
+
+        .reset-button {
+            width: 46px;
+            color: var(--ink);
+            background: #f1f5f9;
         }
-        .analyzer-meter {
-        width: 100%;
-        height: 40px;
-        background-color: #25d366; /* Green */
-        border-radius: 5px;
-        padding-bottom: 5%;
-        overflow: hidden;
-      }
-        .fill {
-            width: 0%;
+
+        .primary-button:hover,
+        .reset-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.72;
+            cursor: progress;
+            transform: none;
+        }
+
+        .status {
+            display: none;
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        .status.active {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fed7aa;
+            border-top-color: var(--brand);
+            border-radius: 50%;
+            animation: spin 780ms linear infinite;
+        }
+
+        .results {
+            display: grid;
+            gap: 14px;
+        }
+
+        .sentiment-card {
+            border-radius: 8px;
+            padding: 22px;
+            color: #fff;
+            background: linear-gradient(135deg, #374151, #111827);
+            position: relative;
+            overflow: hidden;
+            min-height: 176px;
+        }
+
+        .sentiment-card.positive { background: linear-gradient(135deg, #16a34a, #14532d); }
+        .sentiment-card.negative { background: linear-gradient(135deg, #ef4444, #7f1d1d); }
+        .sentiment-card.neutral { background: linear-gradient(135deg, #f59e0b, #78350f); }
+
+        .sentiment-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -48px -70px auto;
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .result-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 800;
+            opacity: 0.84;
+        }
+
+        .sentiment-word {
+            margin: 8px 0;
+            font-size: clamp(34px, 5vw, 56px);
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .score-line {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .distribution,
+        .insights,
+        .comments {
+            display: grid;
+            gap: 11px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: 82px 1fr 54px;
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .track {
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .bar {
             height: 100%;
-            background-color: #0079d3;
-            transition: width 2s ease;
-            animation: fillAnimation 4s forwards;
+            width: 0;
+            border-radius: inherit;
+            transition: width 700ms cubic-bezier(.2,.7,.2,1);
         }
 
-        .positive {
-            color: #4CAF50;
-        }
-        .negative {
-            color: #F44336;
-        }
-        .neutral {
-            color: #262626;
-        }
-        .button-container {
-        display: flex;
-        justify-content: space-around;
-        margin-top: 40px;
-      }
+        .bar.positive { background: var(--green); }
+        .bar.neutral { background: var(--amber); }
+        .bar.negative { background: var(--red); }
 
-      .social-button {
-        padding: 15px;
-        font-size: 30px;
-        background-color: #ffffff;
-        border: none;
-        cursor: pointer;
-        border-radius: 50%;
-        transition: background-color 0.3s ease;
-      }
-
-      .social-button:hover {
-        background-color: #a0a0a0;
-      }
-
-      #instagram-icon {
-        color: #833ab4; /* Instagram purple */
-      }
-      #twitter-icon {
-        color: #1da1f2; /* twitter purple */
-      }
-      #WhatsApp-icon {
-        color: #075e54; /* WhatsApp Green */
-      }
-      #Youtube-icon {
-        color: #ff0000; /* Youtube red */
-      }
-      #Reddit-icon {
-        color: #ff4500; /* Reddit orrange */
-      }
-
-      @keyframes changeBackground {
-        0% {
-          background-position: 0% 50%;
+        .insights-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #334155;
+            line-height: 1.55;
         }
-        100% {
-          background-position: 100% 50%;
-        }
-      }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-20px);
+        .comment-item {
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+            color: #334155;
+            line-height: 1.5;
+            font-size: 14px;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
 
-        @keyframes bgAnimation {
-            0% {
-                background-position: 0% 50%;
+        .comment-item:first-of-type {
+            border-top: 0;
+            padding-top: 0;
+        }
+
+        .tag {
+            display: inline-flex;
+            margin-bottom: 6px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .tag.positive { background: var(--green); }
+        .tag.neutral { background: var(--amber); }
+        .tag.negative { background: var(--red); }
+
+        .empty-state {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 24px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.72);
+            text-align: center;
+        }
+
+        .error {
+            display: none;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-weight: 800;
+        }
+
+        .error.active { display: block; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes floatGlow {
+            from { transform: translate3d(0, 0, 0) rotate(0deg); }
+            to { transform: translate3d(-40px, -24px, 0) rotate(24deg); }
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 620px) {
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
             }
-            100% {
-                background-position: 100% 50%;
-            }
-        }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes buttonAnimation {
-            0% {
-                transform: translateY(-50%) scale(1);
-            }
-            50% {
-                transform: translateY(-50%) scale(1.1);
-            }
-            100% {
-                transform: translateY(-50%) scale(1);
-            }
-        }
-
-        @keyframes resultAnimation {
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes emojiAnimation {
-            0% {
-                transform: scale(1);
-            }
-            100% {
-                transform: scale(1.2);
-            }
-        }
-
-        @keyframes fillAnimation {
-            to {
-                width: 100%;
+            .nav-actions { justify-content: flex-start; }
+            .stats-strip { grid-template-columns: 1fr; }
+            .primary-button { flex: 1; }
+            .reset-button { width: 46px; }
+            .bar-row {
+                grid-template-columns: 72px 1fr 46px;
+                gap: 8px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <i class="fab fa-reddit-alien fa-4x" style="color: #FF6314;"></i>
-        <h1>Reddit Sentiment Analysis</h1>
-        <div class="button-container">
-        <button class="social-button" onclick="window.location.href='/'">
-        <i id="home-icon" class="fas fa-home"></i>
-      </button>
-        <button class="social-button" onclick="window.location.href='Youtube'">
-          <i id="Youtube-icon" class="fab fa-youtube"></i>
-        </button>
-        <button class="social-button" onclick="window.location.href='Twitter'">
-          <i id="Reddit-icon " class="fab fa-twitter"></i>
-        </button>
-      </div>
-        <textarea id="input-text" placeholder="Enter your Reddit post or comment here..." autofocus></textarea><br>
-        <div id="result"></div>
-        <div class="emoji-meter">
-            <span class="emoji">😞</span>
-            <span class="emoji">😐</span>
-            <span class="emoji">😊</span>
+    <main class="page">
+        <nav class="topbar" aria-label="Primary navigation">
+            <div class="brand">
+                <i class="fab fa-reddit-alien" aria-hidden="true"></i>
+                <span>Reddit Sentiment Analyzer</span>
+            </div>
+            <div class="nav-actions">
+                <a class="icon-link" href="/" title="Home" aria-label="Home"><i class="fas fa-home"></i></a>
+                <a class="icon-link" href="Youtube" title="YouTube" aria-label="YouTube"><i class="fab fa-youtube" style="color:#ff0000"></i></a>
+                <a class="icon-link" href="Twitter" title="X" aria-label="X"><strong>X</strong></a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="intro">
+                <div class="kicker"><i class="fas fa-comments"></i> Reddit discussion sentiment</div>
+                <h1>Turn Reddit comments into a readable sentiment report.</h1>
+                <p class="subtitle">
+                    Analyze post text, comments, or copied discussion snippets with positive, neutral, and negative breakdowns plus context-rich samples.
+                </p>
+                <div class="stats-strip">
+                    <div class="mini-stat"><strong id="miniTotal">0</strong><span>segments analyzed</span></div>
+                    <div class="mini-stat"><strong id="miniConfidence">0%</strong><span>label confidence</span></div>
+                    <div class="mini-stat"><strong id="miniScore">0.00</strong><span>average score</span></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <form class="form-card" id="sentiment-form" method="post">
+                    {% csrf_token %}
+                    <label for="input-text">Reddit post or comment text</label>
+                    <textarea id="input-text" name="text" placeholder="Paste Reddit post, comment, or thread text here..." required autofocus></textarea>
+                    <div class="actions">
+                        <button class="primary-button" type="submit" id="analyze-button"><i class="fas fa-chart-line"></i>Analyze</button>
+                        <button class="reset-button" type="button" id="reset-button" title="Clear" aria-label="Clear form"><i class="fas fa-redo"></i></button>
+                    </div>
+                    <div class="status" id="status"><span class="spinner"></span><span>Calculating sentiment...</span></div>
+                </form>
+
+                <div class="error" id="error"></div>
+
+                <section class="results" id="results" aria-live="polite">
+                    <div class="empty-state">Results will appear here after analysis.</div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <template id="results-template">
+        <div class="sentiment-card" id="sentiment-card">
+            <div class="result-label">Overall sentiment</div>
+            <div class="sentiment-word" id="sentiment-word">Neutral</div>
+            <div class="score-line">
+                <span><strong id="total-comments">0</strong> segments</span>
+                <span>Score <strong id="score">0.00</strong></span>
+                <span>Confidence <strong id="confidence">0%</strong></span>
+            </div>
         </div>
-        <div class="analyzer-meter">
-        <h5 id="submit-button">Submit</h5>
-        <div class="fill"></div>
-      </div>
+        <div class="distribution">
+            <h2 class="section-title"><i class="fas fa-poll"></i> Sentiment distribution</h2>
+            <div class="bar-row"><span>Positive</span><div class="track"><div class="bar positive" id="positive-bar"></div></div><span id="positive-value">0%</span></div>
+            <div class="bar-row"><span>Neutral</span><div class="track"><div class="bar neutral" id="neutral-bar"></div></div><span id="neutral-value">0%</span></div>
+            <div class="bar-row"><span>Negative</span><div class="track"><div class="bar negative" id="negative-bar"></div></div><span id="negative-value">0%</span></div>
+        </div>
+        <div class="insights">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i> Key insights</h2>
+            <ul class="insights-list" id="insights-list"></ul>
+        </div>
+        <div class="comments">
+            <h2 class="section-title"><i class="fas fa-quote-left"></i> Strongest text samples</h2>
+            <div id="comment-list"></div>
+        </div>
+    </template>
 
     <script>
-        document.getElementById("submit-button").addEventListener('click', function() {
-            var text = document.getElementById('input-text').value;
-            var resultElement = document.getElementById('result');
-            var emojis = document.querySelectorAll('.emoji-meter span');
-            var fill = document.querySelector('.fill');
+        const form = document.getElementById("sentiment-form");
+        const analyzeButton = document.getElementById("analyze-button");
+        const statusBox = document.getElementById("status");
+        const errorBox = document.getElementById("error");
+        const results = document.getElementById("results");
+        const template = document.getElementById("results-template");
 
-            // Reset fill
-            fill.style.width = '0%';
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            setLoading(true);
+            showError("");
 
-            // Show loading animation
-            resultElement.innerHTML = 'Analyzing...';
-            emojis.forEach(function(emoji) {
-                emoji.classList.remove('active');
-            });
-
-            // Simulate delay for analysis
-            setTimeout(function() {
-                var sentiment = analyzeSentiment(text);
-                if (sentiment === 'positive') {
-                    resultElement.innerHTML = 'Sentiment: 😊 Positive';
-                    resultElement.className = 'positive';
-                    emojis[2].classList.add('active');
-                } else if (sentiment === 'negative') {
-                    resultElement.innerHTML = 'Sentiment: 😞 Negative';
-                    resultElement.className = 'negative';
-                    emojis[0].classList.add('active');
-                } else {
-                    resultElement.innerHTML = 'Sentiment: 😐 Neutral';
-                    resultElement.className = 'neutral';
-                    emojis[1].classList.add('active');
+            try {
+                const response = await fetch("/analyze_text_sentiment/", {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: { "X-CSRFToken": getCookie("csrftoken") }
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || "Unable to analyze this text.");
                 }
-                // Fill up the analyzer meter
-                fill.style.width = '100%';
-            }, 2000); // Adjust delay time as needed
+                renderResults(data);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
         });
 
-        function analyzeSentiment(text) {
-            // Placeholder function for sentiment analysis
-            // You can replace this with your actual sentiment analysis algorithm
-            // For simplicity, we'll just return random sentiment here
-            var sentiments = ['positive', 'negative', 'neutral'];
-            return sentiments[Math.floor(Math.random() * sentiments.length)];
+        document.getElementById("reset-button").addEventListener("click", function() {
+            form.reset();
+            showError("");
+            results.innerHTML = '<div class="empty-state">Results will appear here after analysis.</div>';
+            updateMiniStats({ total_comments: 0, confidence: 0, score: 0 });
+            document.getElementById("input-text").focus();
+        });
+
+        function renderResults(data) {
+            results.innerHTML = "";
+            results.appendChild(template.content.cloneNode(true));
+
+            const sentiment = (data.label || "NEUTRAL").toLowerCase();
+            document.getElementById("sentiment-card").classList.add(sentiment);
+            document.getElementById("sentiment-word").textContent = titleCase(sentiment);
+            document.getElementById("total-comments").textContent = data.total_comments || 0;
+            document.getElementById("score").textContent = Number(data.score || 0).toFixed(2);
+            document.getElementById("confidence").textContent = `${Number(data.confidence || 0).toFixed(1)}%`;
+
+            setBar("positive", data.percentages?.positive || 0);
+            setBar("neutral", data.percentages?.neutral || 0);
+            setBar("negative", data.percentages?.negative || 0);
+
+            const insightsList = document.getElementById("insights-list");
+            (data.insights || []).forEach(function(insight) {
+                const item = document.createElement("li");
+                item.textContent = insight.replace("public comments", "text segments");
+                insightsList.appendChild(item);
+            });
+
+            const commentList = document.getElementById("comment-list");
+            (data.top_comments || []).forEach(function(comment) {
+                const label = (comment.label || "NEUTRAL").toLowerCase();
+                const item = document.createElement("div");
+                item.className = "comment-item";
+                item.innerHTML = `<span class="tag ${label}">${titleCase(label)} ${Number(comment.compound || 0).toFixed(2)}</span><div></div>`;
+                item.querySelector("div").textContent = comment.text;
+                commentList.appendChild(item);
+            });
+            if (!commentList.children.length) {
+                commentList.textContent = "No strong samples were available.";
+            }
+
+            updateMiniStats(data);
+        }
+
+        function setBar(name, value) {
+            const numericValue = Number(value).toFixed(1);
+            document.getElementById(`${name}-value`).textContent = `${numericValue}%`;
+            requestAnimationFrame(function() {
+                document.getElementById(`${name}-bar`).style.width = `${numericValue}%`;
+            });
+        }
+
+        function updateMiniStats(data) {
+            document.getElementById("miniTotal").textContent = data.total_comments || 0;
+            document.getElementById("miniConfidence").textContent = `${Number(data.confidence || 0).toFixed(1)}%`;
+            document.getElementById("miniScore").textContent = Number(data.score || 0).toFixed(2);
+        }
+
+        function setLoading(isLoading) {
+            analyzeButton.disabled = isLoading;
+            statusBox.classList.toggle("active", isLoading);
+        }
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.classList.toggle("active", Boolean(message));
+        }
+
+        function titleCase(value) {
+            return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     </script>
 </body>

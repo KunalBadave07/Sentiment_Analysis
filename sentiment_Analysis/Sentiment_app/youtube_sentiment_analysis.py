@@ -3,6 +3,7 @@
 
 # %%
 from googleapiclient.discovery import build
+import os
 import pandas as pd
 import pandas as pd
 import numpy as np
@@ -14,7 +15,9 @@ plt.style.use("ggplot")
 import nltk
 
 # %%
-youtubeAPIKey = "AIzaSyAIuSegS5UllyaWInMpcNDZkHLxErHxwIg"
+youtubeAPIKey = os.getenv("YOUTUBE_API_KEY")
+if not youtubeAPIKey:
+    raise RuntimeError("Set the YOUTUBE_API_KEY environment variable before using this script.")
 youtube = build('youtube','v3',developerKey=youtubeAPIKey)
 
 # %%

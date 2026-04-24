@@ -8,5 +8,6 @@ urlpatterns = [
     path("WhatsApp", views.WhatsApp, name="WhatsApp"),
     path("Youtube", views.analyze_sentiment_view, name="Youtube"),
     path("analyze_sentiment/", views.analyze_sentiment_view, name="analyze_sentiment"),  # Add this line
+    path("analyze_text_sentiment/", views.analyze_text_sentiment_view, name="analyze_text_sentiment"),
     path("Reddit", views.Reddit, name='Reddit'),
 ]

@@ -5,351 +5,719 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Sentiment Analysis</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 90px 0px 20px 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px; /* Adjusted minimum height */
-            background-image: url("https://assets.materialup.com/uploads/59f0d846-4dcc-49cf-bac7-2f18baca1e01/preview.png");
-            animation: bgAnimation 20s infinite alternate;
+        :root {
+            --ink: #15171c;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --surface: rgba(255, 255, 255, 0.92);
+            --red: #ef4444;
+            --green: #16a34a;
+            --amber: #f59e0b;
+            --blue: #2563eb;
+            --shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
         }
 
-        .container {
-            text-align: center;
-            animation: fadeIn 4s ease;
-            border-radius: 70px;
-            padding: 30px;
-            background-color: #FFF;
-            width: 350px;
-            max-width: 90%;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: Inter, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(239, 68, 68, 0.22), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.2), transparent 32%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 46%, #fff7ed 100%);
+            overflow-x: hidden;
+        }
+
+        .page {
+            width: min(1180px, calc(100% - 32px));
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 28px 0 42px;
+            display: grid;
+            align-content: center;
+            gap: 24px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .brand i {
+            color: #ff0000;
+            font-size: 32px;
+            filter: drop-shadow(0 8px 18px rgba(239, 68, 68, 0.28));
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .icon-link,
+        .ghost-button {
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            background: rgba(255, 255, 255, 0.76);
+            color: var(--ink);
+            min-width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+        }
+
+        .icon-link:hover,
+        .ghost-button:hover {
+            transform: translateY(-2px);
+            background: #fff;
+            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.1);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 0.96fr) minmax(360px, 1.04fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .intro,
+        .panel {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .intro {
+            padding: clamp(28px, 5vw, 54px);
             position: relative;
             overflow: hidden;
-            opacity: 0.9;
+        }
+
+        .intro::after {
+            content: "";
+            position: absolute;
+            inset: auto -80px -120px auto;
+            width: 260px;
+            height: 260px;
+            background: conic-gradient(from 120deg, rgba(239, 68, 68, 0.28), rgba(37, 99, 235, 0.16), rgba(22, 163, 74, 0.2), rgba(239, 68, 68, 0.28));
+            filter: blur(18px);
+            opacity: 0.75;
+            animation: floatGlow 8s ease-in-out infinite alternate;
+        }
+
+        .kicker {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            color: #991b1b;
+            background: #fee2e2;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 18px;
         }
 
         h1 {
-            color: #ff0000;
-            font-size: 28px;
-            margin-bottom: 20px;
+            margin: 0;
+            font-size: clamp(36px, 5.4vw, 66px);
+            line-height: 1;
+            letter-spacing: 0;
         }
 
-        #input-text {
-            width: 70%;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            border: 2px solid #ccc;
-            border-radius: 20px;
-            background-color: #f0f0f0;
-            resize: none;
-            transition: all 0.3s ease;
-        }
-
-        #input-text:focus {
-            border-color: #ff3333;
-        }
-
-        #analyze-button {
-            padding: 8px;
-            font-size: 15px;
-            background-color: #FF6961;
-            border: none;
-            cursor: pointer;
-            border-radius: 10%;
-            position: absolute;
-            top: 75%;
-            right: 175px;
-            transform: translateY(-50%);
-
-        }
-
-        #analyze-button:hover {
-            background-color: #FF0000;
-        }
-
-        #reload-button {
-            padding: 5px;
-            font-size: 35px;
-            background-color: #FFF;
-            border: none;
-            cursor: pointer;
-            border-radius: 50%;
-            position: absolute;
-            top: 52%;
-            left: 343px;
-            transform: translateY(-50%);
-            color: #fff;
-            transition: background-color 0.3s ease;
-        }
-
-        #reload-button:hover {
-            background-color: #fff; 
-            
-        }
-
-        #result {
-            margin-top: 5px;
+        .subtitle {
+            margin: 18px 0 0;
+            max-width: 620px;
+            color: #4b5563;
             font-size: 18px;
-            font-weight: bold;
-            color: #F98B88;
-            animation: resultAnimation 0.2s forwards;
-            opacity: 0;
+            line-height: 1.65;
         }
 
-        .emoji-meter {
-            display: flex;
-            justify-content: center;
-            margin-top: 100px;
-            font-size: 24px;
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 34px;
+            position: relative;
+            z-index: 1;
         }
 
-        .emoji-meter span {
-            margin: 0 10px;
-            opacity: 0.5;
-            transition: opacity 0.3s ease;
-            animation: emojiAnimation 2s infinite alternate;
+        .mini-stat {
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.72);
         }
 
-        .emoji-meter span.active {
-            opacity: 1;
+        .mini-stat strong {
+            display: block;
+            font-size: 22px;
         }
 
-        .analyzer-meter {
+        .mini-stat span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .panel {
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .form-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px;
+            background: #fff;
+        }
+
+        label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+        }
+
+        input[type="url"] {
             width: 100%;
-            height: 30px;
-            border-radius: 40px;
-            padding-bottom: 4%;
+            min-height: 48px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0 14px;
+            font-size: 15px;
+            outline: none;
+            transition: border 180ms ease, box-shadow 180ms ease;
+        }
+
+        input[type="url"]:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+        }
+
+        .primary-button,
+        .reset-button {
+            min-height: 48px;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+        }
+
+        .primary-button {
+            padding: 0 20px;
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 16px 26px rgba(239, 68, 68, 0.22);
+        }
+
+        .reset-button {
+            width: 48px;
+            color: var(--ink);
+            background: #f3f4f6;
+        }
+
+        .primary-button:hover,
+        .reset-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.72;
+            cursor: progress;
+            transform: none;
+        }
+
+        .status {
+            display: none;
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 12px;
+        }
+
+        .status.active {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fecaca;
+            border-top-color: var(--red);
+            border-radius: 50%;
+            animation: spin 780ms linear infinite;
+        }
+
+        .results {
+            display: grid;
+            gap: 14px;
+        }
+
+        .sentiment-card {
+            border-radius: 8px;
+            padding: 22px;
+            color: #fff;
+            background: linear-gradient(135deg, #374151, #111827);
+            position: relative;
+            overflow: hidden;
+            min-height: 182px;
+        }
+
+        .sentiment-card.positive {
+            background: linear-gradient(135deg, #16a34a, #14532d);
+        }
+
+        .sentiment-card.negative {
+            background: linear-gradient(135deg, #ef4444, #7f1d1d);
+        }
+
+        .sentiment-card.neutral {
+            background: linear-gradient(135deg, #f59e0b, #78350f);
+        }
+
+        .sentiment-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -48px -70px auto;
+            width: 210px;
+            height: 210px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .result-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 800;
+            opacity: 0.84;
+        }
+
+        .sentiment-word {
+            margin: 8px 0;
+            font-size: clamp(34px, 5vw, 56px);
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .score-line {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .distribution {
+            display: grid;
+            gap: 11px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            background: #fff;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: 82px 1fr 54px;
+            gap: 12px;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .track {
+            height: 12px;
+            background: #f3f4f6;
+            border-radius: 999px;
             overflow: hidden;
         }
 
-        .fill {
-            width: 1%;
-            height: 85%;
-            background-color: #FF6961;
-            transition: width 2s ease;
-            animation: fillAnimation 3s forwards;
+        .bar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            transition: width 700ms cubic-bezier(.2,.7,.2,1);
         }
 
-        @keyframes changeBackground {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 100% 50%;
-            }
+        .bar.positive { background: var(--green); }
+        .bar.neutral { background: var(--amber); }
+        .bar.negative { background: var(--red); }
+
+        .insights,
+        .comments {
+            display: grid;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            background: #fff;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes bgAnimation {
-            0% {
-                background-position: 0% 50%;
-            }
-            100% {
-                background-position: 100% 50%;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes buttonAnimation {
-            0% {
-                transform: translateY(-50%) scale(1);
-            }
-            50% {
-                transform: translateY(-50%) scale(1.1);
-            }
-            100% {
-                transform: translateY(-50%) scale(1);
-            }
-        }
-
-        .button-container {
+        .section-title {
             display: flex;
-            justify-content: space-around;
-            margin-top: 40px;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-size: 16px;
         }
 
-        .social-button {
-            padding: 10px;
-            font-size: 20px;
-            background-color: #ffffff;
-            border: none;
-            cursor: pointer;
-            border-radius: 20%;
-            transition: background-color 0.3s ease;
+        .insights-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #374151;
+            line-height: 1.55;
         }
 
-        .social-button:hover {
-            background-color: #A0A0A0;
+        .comment-item {
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+            color: #374151;
+            line-height: 1.5;
+            font-size: 14px;
         }
 
-        #instagram-icon {
-            color: #833ab4; /* Instagram purple */
+        .comment-item:first-of-type {
+            border-top: 0;
+            padding-top: 0;
         }
 
-        #twitter-icon {
-            color: #1da1f2; /* twitter purple */
+        .tag {
+            display: inline-flex;
+            margin-bottom: 6px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
         }
 
-        #WhatsApp-icon {
-            color: #075e54; /* WhatsApp Green */
+        .tag.positive { background: var(--green); }
+        .tag.neutral { background: var(--amber); }
+        .tag.negative { background: var(--red); }
+
+        .empty-state {
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 24px;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.72);
+            text-align: center;
         }
 
-        #Youtube-icon {
-            color: #ff0000; /* Youtube red */
+        .error {
+            display: none;
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-weight: 700;
         }
 
-        #Reddit-icon {
-            color: #ff4500; /* Reddit orrange */
+        .error.active {
+            display: block;
         }
 
-        @keyframes changeBackground {
-            0% {
-                background-position: 0% 50%;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes floatGlow {
+            from { transform: translate3d(0, 0, 0) rotate(0deg); }
+            to { transform: translate3d(-40px, -24px, 0) rotate(24deg); }
+        }
+
+        @media (max-width: 900px) {
+            .hero {
+                grid-template-columns: 1fr;
             }
-            100% {
-                background-position: 100% 50%;
-            }
         }
 
-        @keyframes resultAnimation {
-            to {
-                opacity: 1;
+        @media (max-width: 620px) {
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
             }
-        }
 
-        @keyframes emojiAnimation {
-            0% {
-                transform: scale(1);
+            .nav-actions {
+                justify-content: flex-start;
             }
-            100% {
-                transform: scale(1.2);
-            }
-        }
 
-        @keyframes fillAnimation {
-            to {
+            .input-row,
+            .stats-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .reset-button {
                 width: 100%;
+            }
+
+            .bar-row {
+                grid-template-columns: 72px 1fr 46px;
+                gap: 8px;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <i class="fab fa-youtube fa-4x" style="color: #ff0000;"></i>
-    <h1>YouTube Sentiment Analysis</h1>
-    <div class="button-container">
-        <button class="social-button" onclick="window.location.href='Twitter'">
-            <i id="twitter-icon" class="fab fa-twitter"></i>
-        </button>
-        <button class="social-button" onclick="window.location.href='Reddit'">
-            <i id="Reddit-icon " class="fab fa-reddit"></i>
-        </button>
-    </div>
-    <form id="sentiment-form" method="post">
-        {% csrf_token %}
-        <textarea id="input-text" name="video_url" class="analyzer-meter" placeholder="Enter your YouTube video link here..." autofocus></textarea><br>
-        <button type="submit" id="analyze-button">Submit</button>
-        <button type="button" id="reload-button">🔄️</button>
-    </form>
-    <div id="result"></div>
-    <div class="emoji-meter">
-        <span class="emoji"></span>
-        <span class="emoji"></span>
-        <span class="emoji"></span>
-    </div>
-    <div class="analyzer-meter">
-        <div class="fill" id="submit-button">😁😐😔</div>
-    </div>
-    <button class="social-button" onclick="window.location.href='/'">
-        <i id="home-icon" class="fas fa-home"></i>
-    </button>
-</div>
+    <main class="page">
+        <nav class="topbar" aria-label="Primary navigation">
+            <div class="brand">
+                <i class="fab fa-youtube" aria-hidden="true"></i>
+                <span>YouTube Sentiment Analyzer</span>
+            </div>
+            <div class="nav-actions">
+                <a class="icon-link" href="/" title="Home" aria-label="Home"><i class="fas fa-home"></i></a>
+                <a class="icon-link" href="Twitter" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter" style="color:#1da1f2"></i></a>
+                <a class="icon-link" href="Reddit" title="Reddit" aria-label="Reddit"><i class="fab fa-reddit" style="color:#ff4500"></i></a>
+            </div>
+        </nav>
 
-<script>
-    document.getElementById('sentiment-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-        var formData = new FormData(this);
-        fetch('/analyze_sentiment/', {  // Update endpoint URL to match your Django URL
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken') // Use a function to get the CSRF token
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                // Update UI based on sentiment analysis result
-                var resultElement = document.getElementById('result');
-                var emojis = document.querySelectorAll('.emoji-meter span');
-                var fill = document.querySelector('.fill');
+        <section class="hero">
+            <div class="intro">
+                <div class="kicker"><i class="fas fa-chart-line"></i> NLP powered comment insights</div>
+                <h1>Understand the real mood behind a video.</h1>
+                <p class="subtitle">
+                    Paste a YouTube link and the app fetches public comments, scores every comment, and summarizes the overall audience sentiment with practical insight.
+                </p>
+                <div class="stats-strip">
+                    <div class="mini-stat"><strong id="miniTotal">0</strong><span>comments analyzed</span></div>
+                    <div class="mini-stat"><strong id="miniConfidence">0%</strong><span>label confidence</span></div>
+                    <div class="mini-stat"><strong id="miniScore">0.00</strong><span>average score</span></div>
+                </div>
+            </div>
 
-                // Reset fill
-                fill.style.width = '0%';
+            <div class="panel">
+                <form class="form-card" id="sentiment-form" method="post">
+                    {% csrf_token %}
+                    <label for="input-text">YouTube video link</label>
+                    <div class="input-row">
+                        <input id="input-text" name="video_url" type="url" placeholder="https://www.youtube.com/watch?v=..." required autofocus>
+                        <button class="primary-button" type="submit" id="analyze-button">
+                            <i class="fas fa-bolt"></i>
+                            Analyze
+                        </button>
+                        <button class="reset-button" type="button" id="reload-button" title="Clear" aria-label="Clear form">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    <div class="status" id="status"><span class="spinner"></span><span>Fetching comments and calculating sentiment...</span></div>
+                </form>
 
-                // Show loading animation
-                resultElement.innerHTML = 'Analyzing...';
-                emojis.forEach(function(emoji) {
-                    emoji.classList.remove('active');
+                <div class="error" id="error"></div>
+
+                <section class="results" id="results" aria-live="polite">
+                    <div class="empty-state" id="empty-state">
+                        Results will appear here after analysis.
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <template id="results-template">
+        <div class="sentiment-card" id="sentiment-card">
+            <div class="result-label">Overall sentiment</div>
+            <div class="sentiment-word" id="sentiment-word">Neutral</div>
+            <div class="score-line">
+                <span><strong id="total-comments">0</strong> comments</span>
+                <span>Score <strong id="score">0.00</strong></span>
+                <span>Confidence <strong id="confidence">0%</strong></span>
+            </div>
+        </div>
+
+        <div class="distribution">
+            <h2 class="section-title"><i class="fas fa-poll"></i> Sentiment distribution</h2>
+            <div class="bar-row">
+                <span>Positive</span>
+                <div class="track"><div class="bar positive" id="positive-bar"></div></div>
+                <span id="positive-value">0%</span>
+            </div>
+            <div class="bar-row">
+                <span>Neutral</span>
+                <div class="track"><div class="bar neutral" id="neutral-bar"></div></div>
+                <span id="neutral-value">0%</span>
+            </div>
+            <div class="bar-row">
+                <span>Negative</span>
+                <div class="track"><div class="bar negative" id="negative-bar"></div></div>
+                <span id="negative-value">0%</span>
+            </div>
+        </div>
+
+        <div class="insights">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i> Key insights</h2>
+            <ul class="insights-list" id="insights-list"></ul>
+        </div>
+
+        <div class="comments">
+            <h2 class="section-title"><i class="fas fa-comments"></i> Sample high-signal comments</h2>
+            <div id="comment-list"></div>
+        </div>
+    </template>
+
+    <script>
+        const form = document.getElementById("sentiment-form");
+        const analyzeButton = document.getElementById("analyze-button");
+        const statusBox = document.getElementById("status");
+        const errorBox = document.getElementById("error");
+        const results = document.getElementById("results");
+        const template = document.getElementById("results-template");
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+            setLoading(true);
+            showError("");
+
+            try {
+                const response = await fetch("/analyze_sentiment/", {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    }
                 });
 
-                // Simulate delay for analysis
-                setTimeout(function() {
-                    // Update UI based on sentiment analysis result
-                    resultElement.innerHTML = 'Sentiment: ' + data.label + ' Score: ' + data.score;
-                    // Fill up the analyzer meter
-                    fill.style.width = '100%';
-                }, 2000); // Adjust delay time as needed
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || "Unable to analyze this video.");
+                }
 
-    // Function to get CSRF token from cookies
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+                renderResults(data);
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        document.getElementById("reload-button").addEventListener("click", function() {
+            form.reset();
+            showError("");
+            results.innerHTML = '<div class="empty-state" id="empty-state">Results will appear here after analysis.</div>';
+            updateMiniStats({ total_comments: 0, confidence: 0, score: 0 });
+            document.getElementById("input-text").focus();
+        });
+
+        function renderResults(data) {
+            results.innerHTML = "";
+            results.appendChild(template.content.cloneNode(true));
+
+            const sentiment = (data.label || "NEUTRAL").toLowerCase();
+            const card = document.getElementById("sentiment-card");
+            card.classList.add(sentiment);
+
+            document.getElementById("sentiment-word").textContent = titleCase(sentiment);
+            document.getElementById("total-comments").textContent = data.total_comments || 0;
+            document.getElementById("score").textContent = Number(data.score || 0).toFixed(2);
+            document.getElementById("confidence").textContent = `${Number(data.confidence || 0).toFixed(1)}%`;
+
+            setBar("positive", data.percentages?.positive || 0);
+            setBar("neutral", data.percentages?.neutral || 0);
+            setBar("negative", data.percentages?.negative || 0);
+
+            const insightsList = document.getElementById("insights-list");
+            (data.insights || []).forEach(function(insight) {
+                const item = document.createElement("li");
+                item.textContent = insight;
+                insightsList.appendChild(item);
+            });
+
+            const commentList = document.getElementById("comment-list");
+            if (data.top_comments && data.top_comments.length) {
+                data.top_comments.forEach(function(comment) {
+                    const item = document.createElement("div");
+                    const label = (comment.label || "NEUTRAL").toLowerCase();
+                    item.className = "comment-item";
+                    item.innerHTML = `<span class="tag ${label}">${titleCase(label)} ${Number(comment.compound || 0).toFixed(2)}</span><div></div>`;
+                    item.querySelector("div").textContent = comment.text;
+                    commentList.appendChild(item);
+                });
+            } else {
+                commentList.textContent = "No sample comments were available.";
+            }
+
+            updateMiniStats(data);
+        }
+
+        function setBar(name, value) {
+            const numericValue = Number(value).toFixed(1);
+            document.getElementById(`${name}-value`).textContent = `${numericValue}%`;
+            requestAnimationFrame(function() {
+                document.getElementById(`${name}-bar`).style.width = `${numericValue}%`;
+            });
+        }
+
+        function updateMiniStats(data) {
+            document.getElementById("miniTotal").textContent = data.total_comments || 0;
+            document.getElementById("miniConfidence").textContent = `${Number(data.confidence || 0).toFixed(1)}%`;
+            document.getElementById("miniScore").textContent = Number(data.score || 0).toFixed(2);
+        }
+
+        function setLoading(isLoading) {
+            analyzeButton.disabled = isLoading;
+            statusBox.classList.toggle("active", isLoading);
+        }
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.classList.toggle("active", Boolean(message));
+        }
+
+        function titleCase(value) {
+            return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
+            return cookieValue;
         }
-        return cookieValue;
-    }
-
-    document.getElementById('reload-button').addEventListener('click', function(event) {
-        location.reload();
-    });
-</script>
+    </script>
 </body>
 </html>
